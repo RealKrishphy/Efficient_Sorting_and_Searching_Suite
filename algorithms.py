@@ -16,35 +16,41 @@ def bubble_sort(arr):
     end = time.time()
     return arr, comps, swaps, round(end - start, 5)
 
-def merge_sort(arr):
-    comps = swaps = 0
-    start = time.time()
-    def merge(left, right):
-        nonlocal comps, swaps
-        result = []
-        i = j = 0
-        while i < len(left) and j < len(right):
-            comps += 1
-            if left[i] <= right[j]:
-                result.append(left[i])
-                i += 1
+def merge_sort(array):
+    comparisons = exchanges = 0
+    start_time = time.time()
+
+    def merge(left_part, right_part):
+        nonlocal comparisons, exchanges
+        merged = []
+        l_idx = r_idx = 0
+
+        while l_idx < len(left_part) and r_idx < len(right_part):
+            comparisons += 1
+            if left_part[l_idx] <= right_part[r_idx]:
+                merged.append(left_part[l_idx])
+                l_idx += 1
             else:
-                result.append(right[j])
-                j += 1
-                swaps += 1
-        result += left[i:]
-        result += right[j:]
-        return result
-    def divide(lst):
-        if len(lst) <= 1:
-            return lst
-        mid = len(lst) // 2
-        left = divide(lst[:mid])
-        right = divide(lst[mid:])
-        return merge(left, right)
-    sorted_arr = divide(arr)
-    end = time.time()
-    return sorted_arr, comps, swaps, round(end - start, 5)
+                merged.append(right_part[r_idx])
+                r_idx += 1
+                exchanges += 1
+
+        merged += left_part[l_idx:]
+        merged += right_part[r_idx:]
+        return merged
+
+    def divide(sub_array):
+        if len(sub_array) <= 1:
+            return sub_array
+        midpoint = len(sub_array) // 2
+        left_half = divide(sub_array[:midpoint])
+        right_half = divide(sub_array[midpoint:])
+        return merge(left_half, right_half)
+
+    sorted_array = divide(array)
+    end_time = time.time()
+    return sorted_array, comparisons, exchanges, round(end_time - start_time, 5)
+
 
 def quick_sort(arr):
     import random
