@@ -1,48 +1,49 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SmartSort Visualizer</title>
-<link rel="stylesheet" href="style.css">
-</head>
-<body>
-<div class="container">
-<h1>SmartSort Visualizer</h1>
-<div class="controls">
-<select id="algo">
-<option value="bubble">Bubble Sort</option>
-<option value="merge">Merge Sort</option>
-<option value="quick">Quick Sort</option>
-</select>
-<select id="size">
-<option value="50">Small (50)</option>
-<option value="200">Medium (200)</option>
-<option value="1000">Large (1000)</option>
-</select>
-<button id="sortBtn">Sort Now</button>
-<button id="shuffleBtn">Shuffle</button>
-<button id="autoBtn">Auto Select</button>
-</div>
-<div id="bars"></div>
-<div id="stats">
-<div class="stat-item">
-<span class="label">Algorithm:</span>
-<span id="algoName" class="value">-</span>
-</div>
-<div class="stat-item">
-<span class="label">Comparisons:</span>
-<span id="comparisons" class="value">-</span>
-</div>
-<div class="stat-item">
-<span class="label">Swaps:</span>
-<span id="swaps" class="value">-</span>
-</div>
-<div class="stat-item">
-<span class="label">Time:</span>
-<span id="time" class="value">-</span>
-</div>
-</div>
-</div>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SmartSort Visualizer</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1>SmartSort Visualizer</h1>
+      <div class="controls">
+        <select id="algo">
+          <option value="bubble">Bubble Sort</option>
+          <option value="merge">Merge Sort</option>
+          <option value="quick">Quick Sort</option>
+        </select>
+        <select id="size">
+          <option value="50">Small (50)</option>
+          <option value="200">Medium (200)</option>
+          <option value="1000">Large (1000)</option>
+        </select>
+        <button id="sortBtn">Sort Now</button>
+        <button id="shuffleBtn">Shuffle</button>
+        <button id="autoBtn">Auto Select</button>
+      </div>
+      <div id="bars"></div>
+      <div id="stats">
+        <div class="stat-item">
+          <span class="label">Algorithm:</span>
+          <span id="algoName" class="value">-</span>
+        </div>
+        <div class="stat-item">
+          <span class="label">Comparisons:</span>
+          <span id="comparisons" class="value">-</span>
+        </div>
+        <div class="stat-item">
+          <span class="label">Swaps:</span>
+          <span id="swaps" class="value">-</span>
+        </div>
+        <div class="stat-item">
+          <span class="label">Time:</span>
+          <span id="time" class="value">-</span>
+        </div>
+      </div>
+    </div>
+    <script src="script.js"></script>
+  </body>
 </html>
