@@ -3,46 +3,58 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>SmartSort Visualizer</title>
+    <title>SmartSort Analyzer</title>
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <div class="container">
-      <h1>SmartSort Visualizer</h1>
+    <div class="page-wrap">
+      <header>
+        <h1>SmartSort Analyzer — Bubble · Quick · Merge</h1>
+      </header>
+
       <div class="controls">
-        <select id="algo">
-          <option value="bubble">Bubble Sort</option>
-          <option value="merge">Merge Sort</option>
-          <option value="quick">Quick Sort</option>
-        </select>
+        <label for="size">Dataset Size:</label>
         <select id="size">
-          <option value="50">Small (50)</option>
-          <option value="200">Medium (200)</option>
-          <option value="1000">Large (1000)</option>
+          <option value="50">50 Elements</option>
+          <option value="200" selected>200 Elements</option>
+          <option value="1000">1000 Elements</option>
         </select>
-        <button id="sortBtn">Sort Now</button>
-        <button id="shuffleBtn">Shuffle</button>
-        <button id="autoBtn">Auto Select</button>
+        <button id="shuffleBtn" class="btn">Shuffle</button>
+        <button id="compareBtn" class="btn">Compare All</button>
+        <button id="autoBtn" class="btn primary">Auto Select</button>
       </div>
-      <div id="bars"></div>
-      <div id="stats">
-        <div class="stat-item">
-          <span class="label">Algorithm:</span>
-          <span id="algoName" class="value">-</span>
-        </div>
-        <div class="stat-item">
-          <span class="label">Comparisons:</span>
-          <span id="comparisons" class="value">-</span>
-        </div>
-        <div class="stat-item">
-          <span class="label">Swaps:</span>
-          <span id="swaps" class="value">-</span>
-        </div>
-        <div class="stat-item">
-          <span class="label">Time:</span>
-          <span id="time" class="value">-</span>
-        </div>
-      </div>
+
+      <main>
+        <section class="chart-stack">
+          <article class="chart-card" id="card-bubble">
+            <h2>Bubble Sort</h2>
+            <div class="chart-container">
+              <div class="bars" id="bars-bubble"></div>
+            </div>
+            <div class="stats" id="stats-bubble"></div>
+          </article>
+
+          <article class="chart-card" id="card-quick">
+            <h2>Quick Sort</h2>
+            <div class="chart-container">
+              <div class="bars" id="bars-quick"></div>
+            </div>
+            <div class="stats" id="stats-quick"></div>
+          </article>
+
+          <article class="chart-card" id="card-merge">
+            <h2>Merge Sort</h2>
+            <div class="chart-container">
+              <div class="bars" id="bars-merge"></div>
+            </div>
+            <div class="stats" id="stats-merge"></div>
+          </article>
+        </section>
+
+        <section class="compare-summary" id="compare-summary"></section>
+        <section class="comparison-table" id="comparison-table"></section>
+      </main>
+      <footer><small>SmartSort Analyzer © 2025</small></footer>
     </div>
     <script src="script.js"></script>
   </body>

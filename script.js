@@ -1,93 +1,162 @@
-const API_BASE = "http://127.0.0.1:8080";
+const API_BASE = "http://127.0.0.1:5050";
+const route = "/compare";
 
-function visualizeArray(arr, animate = true) {
-  const bars = document.getElementById("bars");
-  bars.innerHTML = "";
-  if (!arr || arr.length === 0) return;
+// 🔹 Color palette
+const plasma = [
+  "#0d0887",
+  "#41049d",
+  "#6a00a8",
+  "#8f0da4",
+  "#b12a90",
+  "#cc4778",
+  "#e16462",
+  "#f2844b",
+  "#fca636",
+  "#fcce25",
+];
+const barColor = (v, max) =>
+  plasma[Math.floor((v / max) * (plasma.length - 1))];
 
-  const max = Math.max(...arr);
+// 🔹 DOM elements
+const bars = {
+  bubble: document.getElementById("bars-bubble"),
+  quick: document.getElementById("bars-quick"),
+  merge: document.getElementById("bars-merge"),
+};
+const stats = {
+  bubble: document.getElementById("stats-bubble"),
+  quick: document.getElementById("stats-quick"),
+  merge: document.getElementById("stats-merge"),
+};
+const summary = document.getElementById("compare-summary");
+const table = document.getElementById("comparison-table");
+const sizeSelector = document.getElementById("size");
+
+// 🎨 Smoothly render optimized bar graph
+function renderBars(container, arr) {
+  container.innerHTML = "";
   const n = arr.length;
-  const displayLimit = n > 300 ? 5 : 1;
-  const plasma = [
-    "#0d0887",
-    "#41049d",
-    "#6a00a8",
-    "#8f0da4",
-    "#b12a90",
-    "#cc4778",
-    "#e16462",
-    "#f2844b",
-    "#fca636",
-    "#fcce25",
-  ];
+  const maxBars = n > 120 ? 120 : n; // only 120 visible bars max
+  const step = Math.floor(n / maxBars);
+  const sampled = arr.filter((_, i) => i % step === 0).slice(0, 120);
 
-  arr.forEach((v, i) => {
-    if (i % displayLimit !== 0) return;
-    const b = document.createElement("div");
-    b.className = "bar";
-    const h = (v / max) * 100;
+  const max = Math.max(...sampled);
+  sampled.forEach((v, i) => {
+    const bar = document.createElement("div");
+    bar.className = "bar";
+    bar.style.background = barColor(v, max);
+    bar.style.height = "0%"; // start from 0 height
+    container.appendChild(bar);
 
-    const cIndex = Math.floor((v / max) * (plasma.length - 1));
-    b.style.background = plasma[cIndex];
-
-    if (animate && n <= 300) {
-      b.style.height = "0%";
-      setTimeout(() => (b.style.height = `${h}%`), i * 1);
-    } else {
-      b.style.height = `${h}%`;
-    }
-    bars.appendChild(b);
+    // smooth delayed animation
+    setTimeout(() => {
+      bar.style.height = (v / max) * 100 + "%";
+    }, i * (1000 / sampled.length)); // evenly timed across bars
   });
 }
 
-async function fetchSorted(algo, size) {
-  const res = await fetch(`${API_BASE}/sort?algo=${algo}&size=${size}`);
-  return res.ok ? res.json() : null;
+// 🧮 Show stats below each chart
+function showStats(id, data) {
+  stats[id].innerHTML = `
+    <div class="stat-item">Time: <strong>${data.time}s</strong></div>
+    <div class="stat-item">Comparisons: <strong>${data.comparisons}</strong></div>
+    <div class="stat-item">Swaps: <strong>${data.swaps}</strong></div>
+    <div class="stat-item">Time Complexity: <strong>${data.time_complexity}</strong></div>
+    <div class="stat-item">Space Complexity: <strong>${data.space_complexity}</strong></div>
+  `;
 }
 
-function shuffleArray(n) {
-  return Array.from({ length: n }, () => Math.floor(Math.random() * 5000));
+// ✨ Highlight winner with smooth blue glow
+function highlightBest(best) {
+  ["bubble", "quick", "merge"].forEach((id) => {
+    const card = document.getElementById("card-" + id);
+    if (id === best) {
+      card.classList.add("highlight");
+    } else {
+      card.classList.add("blurred");
+    }
+  });
+
+  // remove highlight after a few seconds (optional)
+  setTimeout(() => resetHighlight(), 3000);
 }
 
-document.getElementById("sortBtn").addEventListener("click", async () => {
-  const algo = document.getElementById("algo").value;
-  const size = parseInt(document.getElementById("size").value, 10);
-  const data = await fetchSorted(algo, size);
+// ♻️ Reset highlight and blur
+function resetHighlight() {
+  ["bubble", "quick", "merge"].forEach((id) => {
+    const card = document.getElementById("card-" + id);
+    card.classList.remove("highlight");
+    card.classList.remove("blurred");
+  });
+}
 
-  if (!data) {
-    alert("Backend not available. Start Flask app.");
-    return;
-  }
+// 🚀 Compare all algorithms
+async function compareAll(size, highlight = false) {
+  summary.textContent = "Analyzing algorithms...";
+  resetHighlight();
+  const res = await fetch(API_BASE + route, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ size }),
+  });
+  const data = await res.json();
+  if (data.error) return alert(data.error);
 
-  document.getElementById("algoName").textContent = data.algorithm;
-  document.getElementById("comparisons").textContent = data.comparisons;
-  document.getElementById("swaps").textContent = data.swaps;
-  document.getElementById("time").textContent = data.time + "s";
+  const algos = ["bubble", "quick", "merge"];
+  algos.forEach((id) => {
+    renderBars(bars[id], data[id].sorted);
+    showStats(id, data[id]);
+  });
 
-  visualizeArray(data.sorted_data, true);
-});
+  const best = algos.reduce((a, b) => (data[a].time < data[b].time ? a : b));
+  summary.textContent = `🏆 Fastest: ${data[best].name} (${data[best].time}s)`;
 
-document.getElementById("shuffleBtn").addEventListener("click", () => {
-  const size = parseInt(document.getElementById("size").value, 10);
-  visualizeArray(shuffleArray(size), true);
-});
+  if (highlight) highlightBest(best);
+  makeComparisonTable(data);
+}
 
-document.getElementById("autoBtn").addEventListener("click", async () => {
-  const size = parseInt(document.getElementById("size").value, 10);
-  let chosen = "quick";
-  if (size <= 50) chosen = "bubble";
-  else if (size <= 200) chosen = "merge";
+// 🧾 Comparison table generator
+function makeComparisonTable(data) {
+  table.innerHTML = `
+  <h3>Algorithm Comparison Summary</h3>
+  <table>
+    <tr>
+      <th>Algorithm</th><th>Time Complexity</th><th>Space Complexity</th>
+      <th>Time (s)</th><th>Comparisons</th><th>Swaps</th>
+    </tr>
+    ${["bubble", "quick", "merge"]
+      .map(
+        (k) => `
+      <tr>
+        <td>${data[k].name}</td>
+        <td>${data[k].time_complexity}</td>
+        <td>${data[k].space_complexity}</td>
+        <td>${data[k].time}</td>
+        <td>${data[k].comparisons}</td>
+        <td>${data[k].swaps}</td>
+      </tr>
+    `
+      )
+      .join("")}
+  </table>`;
+}
 
-  const data = await fetchSorted(chosen, size);
-  if (!data) {
-    alert("Backend not available. Start Flask app.");
-    return;
-  }
+// 🎲 Shuffle dataset with animation
+document.getElementById("shuffleBtn").onclick = () => {
+  resetHighlight();
+  const arr = Array.from(
+    { length: parseInt(sizeSelector.value) },
+    () => Math.floor(Math.random() * 500) + 1
+  );
+  Object.values(bars).forEach((b) => renderBars(b, arr));
+  summary.textContent = "Dataset reshuffled — ready to compare!";
+  table.innerHTML = "";
+};
 
-  document.getElementById("algoName").textContent = data.algorithm;
-  document.getElementById("comparisons").textContent = data.comparisons;
-  document.getElementById("swaps").textContent = data.swaps;
-  document.getElementById("time").textContent = data.time + "s";
+// 🧠 Compare All (no highlight)
+document.getElementById("compareBtn").onclick = () =>
+  compareAll(parseInt(sizeSelector.value), false);
 
-  visualizeArray(data.sorted_data, true);
-});
+// ⚡ Auto Select (highlight best)
+document.getElementById("autoBtn").onclick = () =>
+  compareAll(parseInt(sizeSelector.value), true);
